@@ -1,6 +1,10 @@
 import cv2 as cv
 import mediapipe as mp
+import os
+import sys
 import time
+
+VIDEO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "videoplayback.mp4")
 
 
 class FaceMeshDetector:
@@ -44,7 +48,8 @@ class FaceMeshDetector:
 
 
 def main():
-    cap = cv.VideoCapture("/home/goge/Desktop/cv/photos&videos/videoplayback.mp4")
+    useCamera = "--camera" in sys.argv
+    cap = cv.VideoCapture(0 if useCamera else VIDEO_PATH)
 
     ptime = 0
     detector = FaceMeshDetector()
@@ -52,8 +57,13 @@ def main():
     while True:
         success, frame = cap.read()
         if not success:
-            print("Could not read the video, so check the path!")
+            if useCamera:
+                print("Could not read from the camera, so check camera permissions!")
+            else:
+                print("Could not read the video, so check the path!")
             break
+        if useCamera:
+            frame = cv.flip(frame, 1)
 
         frame = detector.findFaceMesh(frame)
 
